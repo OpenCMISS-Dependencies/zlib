@@ -1,0 +1,187 @@
+
+ # ***** BEGIN LICENSE BLOCK *****
+ # Version: MPL 1.1/GPL 2.0/LGPL 2.1
+ #
+ # The contents of this file are subject to the Mozilla Public License Version
+ # 1.1 (the "License"); you may not use this file except in compliance with
+ # the License. You may obtain a copy of the License at
+ # http://www.mozilla.org/MPL/
+ #
+ # Software distributed under the License is distributed on an "AS IS" basis,
+ # WITHOUT WARRANTY OF ANY KIND, either express or implied. See the License
+ # for the specific language governing rights and limitations under the
+ # License.
+ #
+ # The Original Code is cmgui
+ #
+ # The Initial Developer of the Original Code is
+ # Auckland Uniservices Ltd, Auckland, New Zealand.
+ # Portions created by the Initial Developer are Copyright (C) 2005
+ # the Initial Developer. All Rights Reserved.
+ #
+ # Contributor(s): 
+ #
+ # Alternatively, the contents of this file may be used under the terms of
+ # either the GNU General Public License Version 2 or later (the "GPL"), or
+ # the GNU Lesser General Public License Version 2.1 or later (the "LGPL"),
+ # in which case the provisions of the GPL or the LGPL are applicable instead
+ # of those above. If you wish to allow use of your version of this file only
+ # under the terms of either the GPL or the LGPL, and not to allow others to
+ # use your version of this file under the terms of the MPL, indicate your
+ # decision by deleting the provisions above and replace them with the notice
+ # and other provisions required by the GPL or the LGPL. If you do not delete
+ # the provisions above, a recipient may use your version of this file under
+ # the terms of any one of the MPL, the GPL or the LGPL.
+ #
+ # ***** END LICENSE BLOCK ***** */
+
+# Set the minimum version of cmake required to 2.6
+CMAKE_MINIMUM_REQUIRED( VERSION 2.6 )
+
+PROJECT( z_lib )
+
+SET( LIBRARY_TARGET_NAME zlib )
+STRING( TOUPPER ${LIBRARY_TARGET_NAME} UPPERCASE_LIBRARY_TARGET_NAME )
+
+SET( EXAMPLE_TARGET_NAME example )
+SET( MINIGZIP_TARGET_NAME minigzip )
+
+SET( ZLIB_MAJOR_VERSION "1" )
+SET( ZLIB_MINOR_VERSION "2" )
+SET( ZLIB_PATCH_VERSION "3" )
+
+MACRO( OPTION_WITH_DEFAULT OPTION_NAME OPTION_STRING OPTION_DEFAULT )
+	IF( NOT DEFINED ${OPTION_NAME} )
+		SET( ${OPTION_NAME} ${OPTION_DEFAULT} )
+	ENDIF( NOT DEFINED ${OPTION_NAME} )
+
+	OPTION( ${OPTION_NAME} "${OPTION_STRING}" ${${OPTION_NAME}} )
+ENDMACRO( OPTION_WITH_DEFAULT OPTION_NAME OPTION_STRING OPTION_DEFAULT )
+
+MACRO( CACHE_VAR_WITH_DEFAULT OPTION_NAME OPTION_DEFAULT OPTION_TYPE OPTION_STRING )
+	IF( NOT DEFINED ${OPTION_NAME} )
+		SET( ${OPTION_NAME} ${OPTION_DEFAULT} )
+	ENDIF( NOT DEFINED ${OPTION_NAME} )
+
+	SET( ${OPTION_NAME} "${OPTION_DEFAULT}" CACHE ${OPTION_TYPE} "${OPTION_STRING}" )
+ENDMACRO( CACHE_VAR_WITH_DEFAULT OPTION_NAME OPTION_DEFAULT OPTION_TYPE OPTION_STRING )
+
+# Set up library options
+# Generic library options
+CACHE_VAR_WITH_DEFAULT( ${UPPERCASE_LIBRARY_TARGET_NAME}_BUILD_TYPE "Release" STRING 
+	"Choose the type of build, options are: Debug Release RelWithDebInfo MinSizeRel" )
+SET( CMAKE_BUILD_TYPE ${${UPPERCASE_LIBRARY_TARGET_NAME}_BUILD_TYPE} CACHE
+	INTERNAL "Internalise this variable and manipulate with
+	${UPPERCASE_LIBRARY_TARGET_NAME}_BUILD_TYPE" FORCE )
+CACHE_VAR_WITH_DEFAULT( ${UPPERCASE_LIBRARY_TARGET_NAME}_INSTALL_PREFIX
+	"${CMAKE_INSTALL_PREFIX}" PATH 
+	"Install path prefix, prepended onto install directories." )
+SET( CMAKE_INSTALL_PREFIX ${${UPPERCASE_LIBRARY_TARGET_NAME}_INSTALL_PREFIX}
+	CACHE INTERNAL "Internalise this variable and manipulate with
+	${UPPERCASE_LIBRARY_TARGET_NAME}_INSTALL_PREFIX" FORCE )
+OPTION_WITH_DEFAULT( ${UPPERCASE_LIBRARY_TARGET_NAME}_BUILD_STATIC_LIB "Build static zlib" TRUE )
+OPTION_WITH_DEFAULT( ${UPPERCASE_LIBRARY_TARGET_NAME}_INSTALL_CONFIG "Install a config file for the library" FALSE )
+
+# Specific library options
+OPTION_WITH_DEFAULT( ${UPPERCASE_LIBRARY_TARGET_NAME}_BUILD_EXAMPLE "Build example${CMAKE_EXECUTABLE_SUFFIX} application" TRUE )
+OPTION_WITH_DEFAULT( ${UPPERCASE_LIBRARY_TARGET_NAME}_BUILD_MINIGZIP "Build minigzip${CMAKE_EXECUTABLE_SUFFIX} application" TRUE )
+
+IF( MSVC )
+	ADD_DEFINITIONS( -D_CRT_SECURE_NO_WARNINGS )
+ENDIF( MSVC )
+IF( ${UPPERCASE_LIBRARY_TARGET_NAME}_BUILD_STATIC_LIB )
+	SET( LIBRARY_BUILD_TYPE STATIC )
+	SET( LIBRARY_INSTALL_TYPE ARCHIVE )
+ELSE( ${UPPERCASE_LIBRARY_TARGET_NAME}_BUILD_STATIC_LIB )
+	SET( LIBRARY_BUILD_TYPE SHARED )
+	SET( LIBRARY_INSTALL_TYPE LIBRARY )
+	IF( WIN32 )
+		SET( LIBRARY_INSTALL_TYPE RUNTIME )
+	ENDIF( WIN32 )
+ENDIF( ${UPPERCASE_LIBRARY_TARGET_NAME}_BUILD_STATIC_LIB )
+
+IF( NOT ${UPPERCASE_LIBRARY_TARGET_NAME}_BUILD_EXAMPLE )
+	SET( EXCLUDE_EXAMPLE EXCLUDE_FROM_ALL )
+ENDIF( NOT ${UPPERCASE_LIBRARY_TARGET_NAME}_BUILD_EXAMPLE )
+IF( NOT ${UPPERCASE_LIBRARY_TARGET_NAME}_BUILD_MINIGZIP )
+	SET( EXCLUDE_MINIGZIP EXCLUDE_FROM_ALL )
+ENDIF( NOT ${UPPERCASE_LIBRARY_TARGET_NAME}_BUILD_MINIGZIP )
+
+SET( ${UPPERCASE_LIBRARY_TARGET_NAME}_SRCS
+	adler32.c
+	compress.c
+	crc32.c
+	deflate.c
+	gzio.c
+	infback.c
+	inffast.c
+	inflate.c
+	inftrees.c
+	trees.c
+	uncompr.c
+	zutil.c )
+SET( ${UPPERCASE_LIBRARY_TARGET_NAME}_HDRS
+	crc32.h
+	deflate.h
+	inffast.h
+	inffixed.h
+	inflate.h
+	inftrees.h
+	trees.h
+	zutil.h )
+SET( ${UPPERCASE_LIBRARY_TARGET_NAME}_PUBLIC_HDRS
+	zconf.h
+	zlib.h )
+SET( EXAMPLE_SRCS
+	example.c )
+SET( MINIGZIP_SRCS
+	minigzip.c )
+
+SET( CMAKE_DEBUG_POSTFIX "d" )
+SET( CMAKE_MFC_FLAG 0 )
+
+IF( WIN32 AND NOT ${UPPERCASE_LIBRARY_TARGET_NAME}_BUILD_STATIC_LIB )
+	SET( ${UPPERCASE_LIBRARY_TARGET_NAME}_WIN32_XTRAS 
+		win32/zlib.def
+		win32/zlib1.rc )
+ENDIF( WIN32 AND NOT ${UPPERCASE_LIBRARY_TARGET_NAME}_BUILD_STATIC_LIB )
+
+ADD_LIBRARY( ${LIBRARY_TARGET_NAME} ${LIBRARY_BUILD_TYPE} 
+	${${UPPERCASE_LIBRARY_TARGET_NAME}_SRCS}
+	${${UPPERCASE_LIBRARY_TARGET_NAME}_HDRS}
+	${${UPPERCASE_LIBRARY_TARGET_NAME}_PUBLIC_HDRS}
+	${${UPPERCASE_LIBRARY_TARGET_NAME}_WIN32_XTRAS} )
+ADD_EXECUTABLE( ${EXAMPLE_TARGET_NAME} ${EXCLUDE_EXAMPLE} ${EXAMPLE_SRCS} ${${UPPERCASE_LIBRARY_TARGET_NAME}_PUBLIC_HDRS} )
+ADD_EXECUTABLE( ${MINIGZIP_TARGET_NAME} ${EXCLUDE_MINIGZIP} ${MINIGZIP_SRCS} ${${UPPERCASE_LIBRARY_TARGET_NAME}_PUBLIC_HDRS} )
+
+TARGET_LINK_LIBRARIES( ${EXAMPLE_TARGET_NAME} ${LIBRARY_TARGET_NAME} )
+TARGET_LINK_LIBRARIES( ${MINIGZIP_TARGET_NAME} ${LIBRARY_TARGET_NAME} )
+
+# Install targets
+IF( WIN32 AND NOT ${UPPERCASE_LIBRARY_TARGET_NAME}_BUILD_STATIC_LIB )
+	SET_TARGET_PROPERTIES(${LIBRARY_TARGET_NAME} PROPERTIES IMPORT_SUFFIX _dll.lib)
+	INSTALL( TARGETS ${LIBRARY_TARGET_NAME} ARCHIVE
+		DESTINATION lib )
+ENDIF( WIN32 AND NOT ${UPPERCASE_LIBRARY_TARGET_NAME}_BUILD_STATIC_LIB )
+
+INSTALL( TARGETS ${LIBRARY_TARGET_NAME} EXPORT ${LIBRARY_TARGET_NAME}-targets ${LIBRARY_INSTALL_TYPE}
+	 DESTINATION lib )
+INSTALL( FILES ${${UPPERCASE_LIBRARY_TARGET_NAME}_PUBLIC_HDRS}
+	DESTINATION include )
+
+IF( ${UPPERCASE_LIBRARY_TARGET_NAME}_INSTALL_CONFIG )
+	SET( LIBRARY_CONFIG_FILE ${CMAKE_CURRENT_BINARY_DIR}/${LIBRARY_TARGET_NAME}-config.cmake )
+	SET( CONFIG_FILE_CONTENTS 
+	        "\nGET_FILENAME_COMPONENT( SELF_DIR \"\${CMAKE_CURRENT_LIST_FILE}\" PATH )"
+	        "\nINCLUDE( \${SELF_DIR}/${LIBRARY_TARGET_NAME}-targets.cmake )"
+	        "\nGET_FILENAME_COMPONENT( ${UPPERCASE_LIBRARY_TARGET_NAME}_INCLUDE_DIRS \"\${SELF_DIR}/../../include\" ABSOLUTE )"
+	        "\nSET( ${UPPERCASE_LIBRARY_TARGET_NAME}_LIBRARIES ${LIBRARY_TARGET_NAME} )"
+	        "\nSET( ${UPPERCASE_LIBRARY_TARGET_NAME}_DEFINITIONS )"
+	        "\nSET( ${UPPERCASE_LIBRARY_TARGET_NAME}_FOUND TRUE )" 
+	        "\n" )
+	FILE( WRITE ${LIBRARY_CONFIG_FILE} ${CONFIG_FILE_CONTENTS} )
+	INSTALL( FILES ${LIBRARY_CONFIG_FILE} DESTINATION lib/cmake )
+	INSTALL( EXPORT ${LIBRARY_TARGET_NAME}-targets 
+		DESTINATION lib/cmake )
+ENDIF( ${UPPERCASE_LIBRARY_TARGET_NAME}_INSTALL_CONFIG )
+
