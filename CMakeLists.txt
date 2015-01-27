@@ -83,9 +83,13 @@ SET( CMAKE_DEBUG_POSTFIX "d" )
 SET( CMAKE_MFC_FLAG 0 )
 
 IF( WIN32 AND BUILD_SHARED_LIBS )
-	SET( ZLIB_WIN32_XTRAS 
-		win32/zlib.def
-		win32/zlib1.rc )
+    add_definitions(-DZLIB_WINAPI)
+	#SET( ZLIB_WIN32_XTRAS 
+#		win32/zlib.def
+		#win32/zlib1.rc)
+    #if (MINGW)
+    #    SET(CMAKE_RC_FLAGS "${CMAKE_RC_FLAGS} --define GCC_WINDRES")
+    #endif()
 ENDIF()
 
 IF(${CMAKE_SYSTEM_NAME} STREQUAL "Linux" AND ${CMAKE_SYSTEM_PROCESSOR} STREQUAL "x86_64" )
