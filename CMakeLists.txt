@@ -39,6 +39,7 @@ CMAKE_MINIMUM_REQUIRED( VERSION 3.0 )
 PROJECT(ZLIB VERSION 1.2.3 LANGUAGES C)
 
 option(BUILD_TESTS "${PROJECT_NAME} - Build tests" ON)
+option(PACKAGE_CONFIG_DIR "Directory for package config files (relative to CMAKE_INSTALL_PREFIX)" "lib/cmake")
 option(ZLIB_BUILD_EXAMPLE "Build example application" ${BUILD_TESTS})
 option(ZLIB_BUILD_MINIGZIP "Build minigzip application" ${BUILD_TESTS})
 
@@ -124,7 +125,7 @@ INSTALL(TARGETS ${ZLIB_TARGET}
 	INCLUDES DESTINATION include)
 INSTALL(FILES ${ZLIB_PUBLIC_HDRS} DESTINATION include )
 
-install(EXPORT zlib-config DESTINATION lib/cmake)
+install(EXPORT zlib-config DESTINATION ${PACKAGE_CONFIG_DIR})
 include(CMakePackageConfigHelpers)
 WRITE_BASIC_PACKAGE_VERSION_FILE(${CMAKE_CURRENT_BINARY_DIR}/zlib-config-version.cmake COMPATIBILITY AnyNewerVersion)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/zlib-config-version.cmake DESTINATION lib/cmake)
