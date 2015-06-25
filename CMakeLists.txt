@@ -39,7 +39,7 @@ CMAKE_MINIMUM_REQUIRED( VERSION 3.0 )
 PROJECT(ZLIB VERSION 1.2.3 LANGUAGES C)
 
 option(BUILD_TESTS "${PROJECT_NAME} - Build tests" ON)
-option(PACKAGE_CONFIG_DIR "Directory for package config files (relative to CMAKE_INSTALL_PREFIX)" "lib/cmake")
+set(PACKAGE_CONFIG_DIR "lib/cmake" CACHE STRING "Directory for package config files (relative to CMAKE_INSTALL_PREFIX)")
 option(ZLIB_BUILD_EXAMPLE "Build example application" ${BUILD_TESTS})
 option(ZLIB_BUILD_MINIGZIP "Build minigzip application" ${BUILD_TESTS})
 
