@@ -39,9 +39,14 @@ CMAKE_MINIMUM_REQUIRED( VERSION 3.0 )
 PROJECT(ZLIB VERSION 1.2.3 LANGUAGES C)
 
 option(BUILD_TESTS "${PROJECT_NAME} - Build tests" ON)
-set(PACKAGE_CONFIG_DIR "lib/cmake" CACHE STRING "Directory for package config files (relative to CMAKE_INSTALL_PREFIX)")
 option(ZLIB_BUILD_EXAMPLE "Build example application" ${BUILD_TESTS})
 option(ZLIB_BUILD_MINIGZIP "Build minigzip application" ${BUILD_TESTS})
+if(WIN32)
+	set(_DEFAULT_PACKAGE_CONFIG_DIR ${PROJECT_NAME}/CMake)
+else()
+	set(_DEFAULT_PACKAGE_CONFIG_DIR lib/cmake/${PROJECT_NAME})
+endif()
+set(PACKAGE_CONFIG_DIR ${_DEFAULT_PACKAGE_CONFIG_DIR} CACHE STRING "Directory for package config files (relative to CMAKE_INSTALL_PREFIX)")
 
 # libz is in compliance with ubuntu (the least)
 SET(ZLIB_TARGET z)
@@ -101,6 +106,7 @@ ENDIF()
 
 add_library(${ZLIB_TARGET} ${ZLIB_SRCS}	${ZLIB_HDRS}
 	${ZLIB_PUBLIC_HDRS}	${ZLIB_WIN32_XTRAS})
+set_property(TARGET ${ZLIB_TARGET} PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 if (BUILD_TESTS)
     if (ZLIB_BUILD_EXAMPLE)
@@ -131,3 +137,4 @@ install(EXPORT zlib-config DESTINATION ${PACKAGE_CONFIG_DIR})
 include(CMakePackageConfigHelpers)
 WRITE_BASIC_PACKAGE_VERSION_FILE(${CMAKE_CURRENT_BINARY_DIR}/zlib-config-version.cmake COMPATIBILITY AnyNewerVersion)
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/zlib-config-version.cmake DESTINATION ${PACKAGE_CONFIG_DIR})
+
