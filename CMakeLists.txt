@@ -44,7 +44,7 @@ option(ZLIB_BUILD_MINIGZIP "Build minigzip application" ${BUILD_TESTS})
 if(WIN32)
 	set(_DEFAULT_PACKAGE_CONFIG_DIR ${PROJECT_NAME}/CMake)
 else()
-	set(_DEFAULT_PACKAGE_CONFIG_DIR lib/cmake/${PROJECT_NAME})
+	set(_DEFAULT_PACKAGE_CONFIG_DIR share/cmake/${PROJECT_NAME})
 endif()
 set(PACKAGE_CONFIG_DIR ${_DEFAULT_PACKAGE_CONFIG_DIR} CACHE STRING "Directory for package config files (relative to CMAKE_INSTALL_PREFIX)")
 
