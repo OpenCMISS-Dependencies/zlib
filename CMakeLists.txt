@@ -41,10 +41,11 @@ PROJECT(ZLIB VERSION 1.2.3 LANGUAGES C)
 option(BUILD_TESTS "${PROJECT_NAME} - Build tests" ON)
 option(ZLIB_BUILD_EXAMPLE "Build example application" ${BUILD_TESTS})
 option(ZLIB_BUILD_MINIGZIP "Build minigzip application" ${BUILD_TESTS})
-if(WIN32)
-	set(_DEFAULT_PACKAGE_CONFIG_DIR ${PROJECT_NAME}/CMake)
+option(BUILD_SHARED_LIBS "Build ${PROJECT_NAME} as a shared library" ON)
+if(MSVC)
+    set(_DEFAULT_PACKAGE_CONFIG_DIR ${PROJECT_NAME}-${PROJECT_VERSION}/CMake)
 else()
-	set(_DEFAULT_PACKAGE_CONFIG_DIR lib/cmake/${PROJECT_NAME})
+    set(_DEFAULT_PACKAGE_CONFIG_DIR lib/cmake/${PROJECT_NAME}-${PROJECT_VERSION})
 endif()
 set(PACKAGE_CONFIG_DIR ${_DEFAULT_PACKAGE_CONFIG_DIR} CACHE STRING "Directory for package config files (relative to CMAKE_INSTALL_PREFIX)")
 
@@ -52,60 +53,61 @@ set(PACKAGE_CONFIG_DIR ${_DEFAULT_PACKAGE_CONFIG_DIR} CACHE STRING "Directory fo
 SET(ZLIB_TARGET z)
 
 IF( MSVC )
-	ADD_DEFINITIONS( -D_CRT_SECURE_NO_WARNINGS )
+    ADD_DEFINITIONS( -D_CRT_SECURE_NO_WARNINGS )
 ENDIF()
 
 SET( ZLIB_SRCS
-	adler32.c
-	compress.c
-	crc32.c
-	deflate.c
-	gzio.c
-	infback.c
-	inffast.c
-	inflate.c
-	inftrees.c
-	trees.c
-	uncompr.c
-	zutil.c )
+    adler32.c
+    compress.c
+    crc32.c
+    deflate.c
+    gzio.c
+    infback.c
+    inffast.c
+    inflate.c
+    inftrees.c
+    trees.c
+    uncompr.c
+    zutil.c )
 SET( ZLIB_HDRS
-	crc32.h
-	deflate.h
-	inffast.h
-	inffixed.h
-	inflate.h
-	inftrees.h
-	trees.h
-	zutil.h )
+    crc32.h
+    deflate.h
+    inffast.h
+    inffixed.h
+    inflate.h
+    inftrees.h
+    trees.h
+    zutil.h )
 SET( ZLIB_PUBLIC_HDRS
-	zconf.h
-	zlib.h )
+    zconf.h
+    zlib.h )
 SET( EXAMPLE_SRCS
-	example.c )
+    example.c )
 SET( MINIGZIP_SRCS
-	minigzip.c )
+    minigzip.c )
 
 SET( CMAKE_DEBUG_POSTFIX "d" )
 SET( CMAKE_MFC_FLAG 0 )
 
-IF( WIN32 AND BUILD_SHARED_LIBS )
+IF(MSVC AND BUILD_SHARED_LIBS)
     add_definitions(-DZLIB_WINAPI)
-	#SET( ZLIB_WIN32_XTRAS 
-#		win32/zlib.def
-		#win32/zlib1.rc)
+
+    SET(ZLIB_WIN32_XTRAS 
+        win32/zlib.def
+        win32/zlib1.rc)
     #if (MINGW)
     #    SET(CMAKE_RC_FLAGS "${CMAKE_RC_FLAGS} --define GCC_WINDRES")
     #endif()
 ENDIF()
 
 IF(${CMAKE_SYSTEM_NAME} STREQUAL "Linux" AND ${CMAKE_SYSTEM_PROCESSOR} STREQUAL "x86_64" )
-	SET_SOURCE_FILES_PROPERTIES(ZLIB_SRCS
-		PROPERTIES COMPILE_FLAGS "-fPIC")
+    SET_SOURCE_FILES_PROPERTIES(ZLIB_SRCS
+        PROPERTIES COMPILE_FLAGS "-fPIC")
 ENDIF()
 
 
-add_library(${ZLIB_TARGET} ${ZLIB_SRCS}	${ZLIB_HDRS}
-	${ZLIB_PUBLIC_HDRS}	${ZLIB_WIN32_XTRAS})
+add_library(${ZLIB_TARGET} ${ZLIB_SRCS} ${ZLIB_HDRS}
+    ${ZLIB_PUBLIC_HDRS} ${ZLIB_WIN32_XTRAS})
 set_property(TARGET ${ZLIB_TARGET} PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 if (BUILD_TESTS)
@@ -120,17 +122,19 @@ if (BUILD_TESTS)
 endif()
 
 # Install targets
-IF( WIN32 AND BUILD_SHARED_LIBS)
-	SET_TARGET_PROPERTIES(${ZLIB_TARGET} PROPERTIES IMPORT_SUFFIX _dll.lib)
-	INSTALL(TARGETS ${ZLIB_TARGET} ARCHIVE DESTINATION lib )
+IF(MSVC AND BUILD_SHARED_LIBS)
+    SET_TARGET_PROPERTIES(${ZLIB_TARGET} PROPERTIES IMPORT_SUFFIX _dll.lib)
 ENDIF()
 
 add_library(zlib INTERFACE)
-target_link_libraries(zlib INTERFACE ${ZLIB_TARGET}) 
+target_link_libraries(zlib INTERFACE ${ZLIB_TARGET})
+
 install(TARGETS ${ZLIB_TARGET} zlib
     EXPORT zlib-config
-	DESTINATION lib
-	INCLUDES DESTINATION include)
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    INCLUDES DESTINATION include)
 INSTALL(FILES ${ZLIB_PUBLIC_HDRS} DESTINATION include)
 
 install(EXPORT zlib-config DESTINATION ${PACKAGE_CONFIG_DIR})

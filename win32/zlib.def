@@ -27,6 +27,7 @@ EXPORTS
     compress2
     compressBound
     uncompress
+    gzdirect
     gzopen
     gzdopen
     gzsetparams
