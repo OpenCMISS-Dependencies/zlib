@@ -1,9 +1,9 @@
-cmake_minimum_required(VERSION 2.4.4)
+cmake_minimum_required(VERSION 3.4.0)
 set(CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS ON)
 
-project(zlib C)
-
 set(VERSION "1.2.12")
+
+project(zlib LANGUAGES C VERSION ${VERSION})
 
 option(ASM686 "Enable building i686 assembly implementation")
 option(AMD64 "Enable building amd64 assembly implementation")
@@ -13,6 +13,8 @@ set(INSTALL_LIB_DIR "${CMAKE_INSTALL_PREFIX}/lib" CACHE PATH "Installation direc
 set(INSTALL_INC_DIR "${CMAKE_INSTALL_PREFIX}/include" CACHE PATH "Installation directory for headers")
 set(INSTALL_MAN_DIR "${CMAKE_INSTALL_PREFIX}/share/man" CACHE PATH "Installation directory for manual pages")
 set(INSTALL_PKGCONFIG_DIR "${CMAKE_INSTALL_PREFIX}/share/pkgconfig" CACHE PATH "Installation directory for pkgconfig (.pc) files")
+set(PACKAGE_CONFIG_DIR "${CMAKE_INSTALL_PREFIX}/share/cmake/ZLIB" CACHE STRING "Directory for CMake package config files.")
+
 
 include(CheckTypeSize)
 include(CheckFunctionExists)
@@ -237,7 +239,6 @@ if(MSVC AND BUILD_SHARED_LIBS)
     set_target_properties(zlib PROPERTIES IMPORT_SUFFIX _dll.lib)
 endif()
 
-set(VERSION "${ZLIB_VERSION_MAJOR}.${ZLIB_VERSION_MINOR}.${ZLIB_VERSION_PATCH}")
 set(PACKAGE "zlib")
 set(PACKAGE_BUGREPORT "zlib@gzip.org")
 set(PACKAGE_NAME "zlib")
