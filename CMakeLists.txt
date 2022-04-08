@@ -5,6 +5,8 @@ set(VERSION "1.2.12")
 
 project(zlib LANGUAGES C VERSION ${VERSION})
 
+set(CMAKE_BUILD_TYPE Release)
+
 option(ASM686 "Enable building i686 assembly implementation")
 option(AMD64 "Enable building amd64 assembly implementation")
 
